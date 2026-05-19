@@ -129,6 +129,7 @@ app.post("/evaluate", (req, res) => {
     }
 
     let result: number;
+
     switch (op) {
       case "+":
         result = a + b;
