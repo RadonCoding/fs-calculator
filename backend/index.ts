@@ -1,0 +1,142 @@
+import express from "express";
+import {
+  isDigit,
+  isOperator,
+  isSeparator,
+  OPERATOR_PRECEDENCE,
+  type Digit,
+  type EvaluateRequest,
+  type EvaluateResponse,
+  type Expression,
+  type Operator,
+  type Separator,
+  type Token,
+} from "common";
+
+const PORT = process.env.PORT || 5001;
+
+const app = express();
+
+app.use(express.json());
+
+app.post("/evaluate", (req, res) => {
+  const { expression: input }: EvaluateRequest = req.body;
+
+  // Extracts digits from the tokens until a non-digit is reached.
+  const digits = (tokens: string[], i: number) => {
+    const d = [];
+
+    let token = tokens[i + d.length];
+
+    while (isDigit(token)) {
+      d.push(token);
+
+      token = tokens[i + d.length];
+    }
+    return d;
+  };
+
+  // Extracts numbers from digit tokens.
+  const numberize = (d: string[]) =>
+    d.reduce((previous, current) => previous * 10 + Number(current), 0);
+
+  // Extracts digits from a number.
+  const digitize = (n: number): Digit[] => {
+    const d: Digit[] = [];
+    do {
+      d.unshift(String(n % 10) as Digit);
+      n = Math.floor(n / 10);
+    } while (n > 0);
+    return d;
+  };
+
+  // Extracts digits and separator from a number.
+  const tokenize = (n: number): Token[] => {
+    const integer = Math.floor(n);
+    const fraction = n - integer;
+
+    if (!fraction) return digitize(integer);
+
+    let f = fraction;
+
+    while (f % 1 !== 0) f *= 10;
+
+    return [...digitize(integer), ".", ...digitize(Math.round(f))];
+  };
+
+  const numbers: number[] = [];
+  const operators: Operator[] = [];
+
+  // Extracts numbers and operators from the tokens.
+  for (let i = 0; i < input.length; i++) {
+    const token = input[i];
+
+    if (isOperator(token)) {
+      operators.push(token);
+    } else if (isSeparator(token)) {
+      const previous = numbers[numbers.length - 1];
+      const fraction = digits(input, i + 1);
+
+      if (typeof previous === "number") {
+        numbers[numbers.length - 1] =
+          previous + numberize(fraction) / 10 ** fraction.length;
+      }
+      i += fraction.length;
+    } else if (isDigit(token)) {
+      const integer = digits(input, i);
+      numbers.push(numberize(integer));
+      i += integer.length - 1;
+    }
+  }
+
+  const operation = (op: Operator, a: number, b: number): number => {
+    console.debug(`${a} ${op} ${b}`);
+
+    switch (op) {
+      case "+":
+        return a + b;
+      case "-":
+        return a - b;
+      case "×":
+        return a * b;
+      case "÷":
+        return a / b;
+    }
+  };
+
+  while (operators.length > 0) {
+    const na = numbers[0];
+    const nb = numbers[1];
+    const nc = numbers[2];
+
+    const oa = operators[0];
+    const ob = operators[1];
+
+    if (oa && ob && OPERATOR_PRECEDENCE[ob] > OPERATOR_PRECEDENCE[oa]) {
+      operators.splice(1, 1);
+      numbers.splice(2, 1);
+      numbers[1] = operation(ob, nb ?? 0, nc ?? 0);
+      continue;
+    }
+
+    if (oa) {
+      operators.splice(0, 1);
+      numbers.splice(1, 1);
+      numbers[0] = operation(oa, na ?? 0, nb ?? 0);
+    }
+  }
+
+  const output: Expression = [];
+
+  const number = numbers[0];
+
+  if (number) {
+    output.push(...tokenize(number));
+  }
+
+  res.json({ expression: output } satisfies EvaluateResponse);
+});
+
+app.listen(PORT, () => {
+  console.log(`server started on port ${PORT}`);
+});
