@@ -6,13 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/evaluate": {
-        target: `http://localhost:${process.env.PORT || 5001}`,
-        changeOrigin: true,
-        configure(proxy) {
-          proxy.on("error", (err) => console.log(err.message));
-        },
-      },
+      "/evaluate": `http://localhost:${process.env.PORT || 5001}`,
     },
   },
   build: {
