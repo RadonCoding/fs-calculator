@@ -14,5 +14,6 @@ test.describe("Calculator", () => {
     await page.waitForResponse(
       (res) => res.url().includes("/evaluate") && res.ok(),
     );
+    await expect(page.getByRole("textbox")).toHaveValue("2.5");
   });
 });
