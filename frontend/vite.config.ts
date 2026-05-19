@@ -9,7 +9,9 @@ export default defineConfig({
       "/evaluate": {
         target: `http://localhost:${process.env.PORT || 5001}`,
         changeOrigin: true,
-        logLevel: "debug",
+        configure(proxy) {
+          proxy.on("error", (err) => console.log(err.message));
+        },
       },
     },
   },
