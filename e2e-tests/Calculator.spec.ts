@@ -7,12 +7,7 @@ test.describe("Calculator", () => {
 
       console.log("STATUS:", res.status());
       console.log("URL:", res.url());
-
-      try {
-        console.log("BODY:", await res.text());
-      } catch {
-        console.log("BODY: <unreadable>");
-      }
+      console.log("HEADERS:", res.headers());
     });
 
     await page.goto("/");
