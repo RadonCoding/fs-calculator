@@ -30,6 +30,10 @@ export const isToken = (input: string): input is Token =>
 
 export type Expression = Token[];
 
+export type ErrorResponse = {
+  message?: string;
+};
+
 export type EvaluateRequest = {
   expression: Expression;
 };

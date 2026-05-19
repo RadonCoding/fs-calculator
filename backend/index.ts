@@ -5,11 +5,11 @@ import {
   isSeparator,
   OPERATOR_PRECEDENCE,
   type Digit,
+  type ErrorResponse,
   type EvaluateRequest,
   type EvaluateResponse,
   type Expression,
   type Operator,
-  type Separator,
   type Token,
 } from "common";
 
@@ -74,13 +74,10 @@ app.post("/evaluate", (req, res) => {
     if (isOperator(token)) {
       operators.push(token);
     } else if (isSeparator(token)) {
-      const previous = numbers[numbers.length - 1];
+      const previous = numbers[numbers.length - 1] ?? 0;
       const fraction = digits(input, i + 1);
-
-      if (typeof previous === "number") {
-        numbers[numbers.length - 1] =
-          previous + numberize(fraction) / 10 ** fraction.length;
-      }
+      numbers[numbers.length - 1] =
+        previous + numberize(fraction) / 10 ** fraction.length;
       i += fraction.length;
     } else if (isDigit(token)) {
       const integer = digits(input, i);
@@ -104,6 +101,15 @@ app.post("/evaluate", (req, res) => {
     }
   };
 
+  /* 
+    Goes through each operator using an algorithm that compares the 
+    current operator precedence with the next operator's precedence.
+
+    If the current operator preceedes the next one it executes the operation with the first and second numbers.
+    If the next operator preceedes the current one it executes the operation with the second and third numbers.
+
+    1 + 2 × 3 ÷ 4 -> 1 + ((2 × 3) ÷ 4)
+  */
   while (operators.length > 0) {
     const na = numbers[0];
     const nb = numbers[1];
@@ -112,14 +118,18 @@ app.post("/evaluate", (req, res) => {
     const oa = operators[0];
     const ob = operators[1];
 
-    if (oa && ob && OPERATOR_PRECEDENCE[ob] > OPERATOR_PRECEDENCE[oa]) {
+    if (
+      oa !== undefined &&
+      ob !== undefined &&
+      OPERATOR_PRECEDENCE[ob] > OPERATOR_PRECEDENCE[oa]
+    ) {
       operators.splice(1, 1);
       numbers.splice(2, 1);
       numbers[1] = operation(ob, nb ?? 0, nc ?? 0);
       continue;
     }
 
-    if (oa) {
+    if (oa !== undefined) {
       operators.splice(0, 1);
       numbers.splice(1, 1);
       numbers[0] = operation(oa, na ?? 0, nb ?? 0);
@@ -130,9 +140,12 @@ app.post("/evaluate", (req, res) => {
 
   const number = numbers[0];
 
-  if (number) {
-    output.push(...tokenize(number));
+  if (number === undefined || !Number.isFinite(number)) {
+    res.status(400).json({ message: "Error" } satisfies ErrorResponse);
+    return;
   }
+
+  output.push(...tokenize(number));
 
   res.json({ expression: output } satisfies EvaluateResponse);
 });

@@ -3,6 +3,7 @@ import styles from "./Calculator.module.css";
 import {
   isDigit,
   isToken,
+  type ErrorResponse,
   type EvaluateRequest,
   type EvaluateResponse,
   type Expression,
@@ -28,10 +29,15 @@ const RIGHT = ["÷", "×", "-", "+"] as const satisfies readonly Token[];
 
 function Calculator() {
   const [expression, setExpression] = useState<Expression>([]);
-
-  const input = useMemo(() => expression.join(""), [expression]);
+  const [error, setError] = useState<string | undefined>();
+  const input = useMemo(
+    () => error ?? expression.join(""),
+    [expression, error],
+  );
 
   const updateExpression = async (input: Expression) => {
+    setError(undefined);
+
     for (let i = 0; i < input.length; i++) {
       if (!isDigit(input[i]) && !isDigit(input[i - 1])) return;
     }
@@ -50,6 +56,13 @@ function Calculator() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ expression: lhs } satisfies EvaluateRequest),
     });
+
+    if (!response.ok) {
+      const { message }: ErrorResponse = await response.json();
+      setExpression([]);
+      setError(message);
+      return;
+    }
 
     const { expression: output }: EvaluateResponse = await response.json();
 
@@ -99,6 +112,7 @@ function Calculator() {
             {LEFT.map((t) => {
               return (
                 <button
+                  key={t}
                   className={styles.button}
                   type="button"
                   onClick={onButtonClick}
@@ -112,6 +126,7 @@ function Calculator() {
             {RIGHT.map((t) => {
               return (
                 <button
+                  key={t}
                   className={`${styles.button} ${styles.operator}`}
                   type="button"
                   onClick={onButtonClick}
