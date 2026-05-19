@@ -1,14 +1,32 @@
 {
+  "name": "simple-calculator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "workspaces": [
     "frontend",
-    "backend",
     "common"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\""
+    "dev": "concurrently \"tsx watch app.ts\" \"npm run dev -w frontend\"",
+    "start": "node app.js",
+    "build": "tsc && npm run build -w frontend",
+    "test:e2e": "npm run test:e2e -w frontend",
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@flydotio/dockerfile": "^0.7.10",
+    "@types/express": "^5.0.6",
     "common": "*",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "eslint": "^10.4.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "typescript-eslint": "^8.59.4"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }

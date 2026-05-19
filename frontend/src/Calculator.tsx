@@ -51,7 +51,7 @@ function Calculator() {
 
     const lhs = input.slice(0, equals);
 
-    const response = await fetch("/api/evaluate", {
+    const response = await fetch("/evaluate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ expression: lhs } satisfies EvaluateRequest),
@@ -97,8 +97,14 @@ function Calculator() {
     updateExpression([...expression, token]);
   };
 
+  const onFormSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    updateExpression([...expression, "="]);
+  };
+
   return (
-    <form className={styles.calculator}>
+    <form className={styles.calculator} onSubmit={onFormSubmit}>
       <div className={styles.inputs}>
         <input
           className={styles.input}
