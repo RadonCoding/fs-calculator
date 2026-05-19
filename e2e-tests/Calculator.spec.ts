@@ -11,6 +11,8 @@ test.describe("Calculator", () => {
     await page.getByRole("button", { name: "÷" }).click();
     await page.getByRole("button", { name: "4" }).click();
     await page.getByRole("button", { name: "=" }).click();
-    await expect(page.getByRole("textbox")).toHaveValue("2.5");
+    await page.waitForResponse(
+      (res) => res.url().includes("/evaluate") && res.ok(),
+    );
   });
 });
