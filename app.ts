@@ -30,6 +30,8 @@ app.get("/health", (req, res) => {
 });
 
 app.post("/evaluate", (req, res) => {
+  const MAXIMUM_PRECISION = 15;
+
   const { expression: input }: EvaluateRequest = req.body;
 
   // Extracts digits from the tokens until a non-digit is reached.
@@ -53,25 +55,50 @@ app.post("/evaluate", (req, res) => {
   // Extracts digits from a number.
   const digitize = (n: number): Digit[] => {
     const d: Digit[] = [];
+
     do {
       d.unshift(String(n % 10) as Digit);
       n = Math.floor(n / 10);
     } while (n > 0);
+
+    return d;
+  };
+
+  // Extracts digits from a fraction.
+  const fractionize = (n: number): Digit[] => {
+    const d: Digit[] = [];
+
+    let s = 0;
+
+    // Convert the fraction to a whole number and trim to maximum precision.
+    while (!Number.isInteger(n) && s < MAXIMUM_PRECISION) {
+      n *= 10;
+      s++;
+    }
+
+    n = Math.round(n);
+
+    // Reduce the scale as long as the last digit is a zero.
+    while (n % 10 === 0 && s > 0) {
+      n = Math.floor(n / 10);
+      s--;
+    }
+
+    for (let i = 0; i < s; i++) {
+      d.unshift(String(n % 10) as Digit);
+      n = Math.floor(n / 10);
+    }
     return d;
   };
 
   // Extracts digits and separator from a number.
   const tokenize = (n: number): Token[] => {
-    const integer = Math.floor(n);
-    const fraction = n - integer;
+    const integer = Math.trunc(n);
+    const fraction = Math.abs(n - integer);
 
     if (!fraction) return digitize(integer);
 
-    let f = fraction;
-
-    while (f % 1 !== 0) f *= 10;
-
-    return [...digitize(integer), ".", ...digitize(Math.round(f))];
+    return [...digitize(integer), ".", ...fractionize(fraction)];
   };
 
   const numbers: number[] = [];
@@ -97,18 +124,27 @@ app.post("/evaluate", (req, res) => {
   }
 
   const operation = (op: Operator, a: number, b: number): number => {
-    console.debug(`${a} ${op} ${b}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.debug(`${a} ${op} ${b}`);
+    }
 
+    let result: number;
     switch (op) {
       case "+":
-        return a + b;
+        result = a + b;
+        break;
       case "-":
-        return a - b;
+        result = a - b;
+        break;
       case "×":
-        return a * b;
+        result = a * b;
+        break;
       case "÷":
-        return a / b;
+        result = a / b;
+        break;
     }
+
+    return parseFloat(result.toPrecision(MAXIMUM_PRECISION));
   };
 
   /* 
