@@ -10,7 +10,7 @@ test.describe("Calculator", () => {
 
       try {
         console.log("BODY:", await res.text());
-      } catch (e) {
+      } catch {
         console.log("BODY: <unreadable>");
       }
     });
