@@ -2,14 +2,6 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Calculator", () => {
   test("evaluates 1 + 2 × 3 ÷ 4 = 2.5", async ({ page }) => {
-    page.on("response", async (res) => {
-      if (!res.url().includes("/evaluate")) return;
-
-      console.log("STATUS:", res.status());
-      console.log("URL:", res.url());
-      console.log("HEADERS:", res.headers());
-    });
-
     await page.goto("/");
     await page.getByRole("button", { name: "1" }).click();
     await page.getByRole("button", { name: "+" }).click();
