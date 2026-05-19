@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/evaluate": "http://localhost:5001",
+      "/evaluate": `http://localhost:${process.env.PORT || 5001}`,
     },
   },
   build: {
