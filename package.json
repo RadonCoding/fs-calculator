@@ -11,12 +11,13 @@
     "dev": "concurrently \"tsx watch app.ts\" \"npm run dev -w frontend\"",
     "start": "node app.js",
     "build": "tsc && npm run build -w frontend",
-    "test:e2e": "npm run test:e2e -w frontend",
+    "test:e2e": "playwright test",
     "lint": "eslint ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@flydotio/dockerfile": "^0.7.10",
+    "@playwright/test": "^1.60.0",
     "@types/express": "^5.0.6",
     "common": "*",
     "concurrently": "^9.2.1",
