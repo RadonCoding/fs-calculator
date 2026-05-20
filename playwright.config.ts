@@ -9,6 +9,8 @@ export default defineConfig({
     {
       command: "npm run dev",
       url: "http://localhost:5173",
+      stdout: "pipe",
+      stderr: "pipe",
     },
   ],
 });
