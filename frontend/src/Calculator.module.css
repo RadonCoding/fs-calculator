@@ -1,5 +1,7 @@
 .calculator {
   display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2rem;
   border-radius: 12px;
   background-color: var(--bg-color-secondary);
@@ -22,6 +24,7 @@
 .inputs {
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: inherit;
 }
 
@@ -62,7 +65,7 @@
 
 .button {
   --background-color: var(--accent-color-primary);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 500;
   border-radius: 12px;
   border: none;
@@ -87,7 +90,7 @@
   filter: brightness(0.8);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 479px) {
   .calculator {
     width: 100vw;
     height: 100dvh;
