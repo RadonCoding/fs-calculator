@@ -1,6 +1,6 @@
 .calculator {
   display: flex;
-  padding: 32px;
+  padding: 2rem;
   border-radius: 12px;
   background-color: var(--bg-color-secondary);
   box-shadow:
@@ -16,7 +16,7 @@
       hsl(
         from var(--bg-color-secondary) calc(h - 5) calc(s * 1.5) calc(l * 0.75)
       );
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .inputs {
@@ -26,8 +26,8 @@
 }
 
 .input {
-  padding: 12px;
-  font-size: 24px;
+  padding: 0.75rem;
+  font-size: 1.5rem;
   font-weight: 500;
   border: none;
   outline: none;
@@ -62,8 +62,7 @@
 
 .button {
   --background-color: var(--accent-color-primary);
-
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 500;
   border-radius: 12px;
   border: none;
